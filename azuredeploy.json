@@ -1,0 +1,920 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      
+	"BaseName": {
+      "type": "string",
+      "metadata": {
+        "description": "Base name for all resources."
+      }
+    },	  
+	 "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "Username for the Virtual Machine."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Password for the Virtual Machine." 
+      }
+    },
+	"DataBaseName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name for the Data Base."
+      }
+    },
+	  "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources." 
+      }
+    }
+	
+     
+    },
+    "variables": {
+	   "servers_dbserver98_name": "[concat(parameters('BaseName'),'dbserver9803')]",
+        "virtualMachines_VM_APP_2_name": "[concat(parameters('BaseName'),'VM-APP-2')]",
+        "virtualNetworks_RG2vnet657_name": "[concat(parameters('BaseName'),'RG2vnet657')]",
+        "storageAccounts_fileserver98_name": "[concat(parameters('BaseName'),'fileserver98')]",
+        "networkInterfaces_vm_app_2444_name": "[concat(parameters('BaseName'),'vm-app-2444')]",
+        "publicIPAddresses_VM_APP_2_ip_name": "[concat(parameters('BaseName'),'VM-APP-2-ip')]",
+        "publicIPAddresses_IpBPDOCUMENT_name": "[concat(parameters('BaseName'),'IpBPDOCUMENT')]",
+        "networkSecurityGroups_VM_APP_2_nsg_name": "[concat(parameters('BaseName'),'VM-APP-2-nsg')]",
+        "storageAccounts_sqlvaj4lmjvwtbf34s_name": "[concat(parameters('BaseName'),'sqlvaj')]",
+        "virtualNetworkGateways_GATEWAYVNET2_name": "[concat(parameters('BaseName'),'GATEWAYVNET2')]",
+        "storageAccounts_sqlauditeaszhlbarjllpzlq_name": "[concat(parameters('BaseName'),'sqlaudit98')]"
+	
+	},
+    "resources": [
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('networkSecurityGroups_VM_APP_2_nsg_name')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "RDP",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "3389",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 300,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "Port_80",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "80",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 310,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "Port_139",
+                        "properties": {
+                            "protocol": "TCP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "139",
+                            "sourceAddressPrefix": "186.154.93.136",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 320,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    },
+                    {
+                        "name": "Port_443",
+                        "properties": {
+                            "protocol": "*",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "443",
+                            "sourceAddressPrefix": "*",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 330,
+                            "direction": "Inbound",
+                            "sourcePortRanges": [],
+                            "destinationPortRanges": [],
+                            "sourceAddressPrefixes": [],
+                            "destinationAddressPrefixes": []
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('publicIPAddresses_IpBPDOCUMENT_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "ipAddress": "52.232.249.28",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Dynamic",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('publicIPAddresses_VM_APP_2_ip_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "ipAddress": "20.186.47.36",
+                "publicIPAddressVersion": "IPv4",
+                "publicIPAllocationMethod": "Static",
+                "idleTimeoutInMinutes": 4,
+                "ipTags": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('virtualNetworks_RG2vnet657_name')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.1.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.1.1.0/24",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    },
+                    {
+                        "name": "GatewaySubnet",
+                        "properties": {
+                            "addressPrefix": "10.1.0.0/24",
+                            "serviceEndpoints": [],
+                            "delegations": [],
+                            "privateEndpointNetworkPolicies": "Enabled",
+                            "privateLinkServiceNetworkPolicies": "Enabled"
+                        }
+                    }
+                ],
+                "virtualNetworkPeerings": [],
+                "enableDdosProtection": false,
+                "enableVmProtection": false
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers",
+            "apiVersion": "2019-06-01-preview",
+            "name": "[variables('servers_dbserver98_name')]",
+            "location": "[parameters('location')]",
+            "kind": "v12.0",
+            "properties": {
+                "administratorLogin": "[parameters('adminUsername')]",
+			    "administratorLoginPassword": "[parameters('adminPassword')]",
+                "version": "12.0",
+                "publicNetworkAccess": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('storageAccounts_fileserver98_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Premium_LRS",
+                "tier": "Premium"
+            },
+            "kind": "FileStorage",
+            "properties": {
+                "largeFileSharesState": "Enabled",
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('storageAccounts_sqlauditeaszhlbarjllpzlq_name')]",
+            "location": "[parameters('location')]",
+            "tags": {
+                "createdBy": "Azure Policy - Deploy Auditing on SQL servers"
+            },
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "BlobStorage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('storageAccounts_sqlvaj4lmjvwtbf34s_name')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            }
+        },
+     
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2020-03-01",
+            "name": "[concat(variables('networkSecurityGroups_VM_APP_2_nsg_name'), '/Port_139')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_VM_APP_2_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "139",
+                "sourceAddressPrefix": "186.154.93.136",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 320,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2020-03-01",
+            "name": "[concat(variables('networkSecurityGroups_VM_APP_2_nsg_name'), '/Port_443')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_VM_APP_2_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "443",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 330,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2020-03-01",
+            "name": "[concat(variables('networkSecurityGroups_VM_APP_2_nsg_name'), '/Port_80')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_VM_APP_2_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "*",
+                "sourcePortRange": "*",
+                "destinationPortRange": "80",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 310,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups/securityRules",
+            "apiVersion": "2020-03-01",
+            "name": "[concat(variables('networkSecurityGroups_VM_APP_2_nsg_name'), '/RDP')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_VM_APP_2_nsg_name'))]"
+            ],
+            "properties": {
+                "protocol": "TCP",
+                "sourcePortRange": "*",
+                "destinationPortRange": "3389",
+                "sourceAddressPrefix": "*",
+                "destinationAddressPrefix": "*",
+                "access": "Allow",
+                "priority": 300,
+                "direction": "Inbound",
+                "sourcePortRanges": [],
+                "destinationPortRanges": [],
+                "sourceAddressPrefixes": [],
+                "destinationAddressPrefixes": []
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-03-01",
+            "name": "[concat(variables('virtualNetworks_RG2vnet657_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworks_RG2vnet657_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.1.1.0/24",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks/subnets",
+            "apiVersion": "2020-03-01",
+            "name": "[concat(variables('virtualNetworks_RG2vnet657_name'), '/GatewaySubnet')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworks_RG2vnet657_name'))]"
+            ],
+            "properties": {
+                "addressPrefix": "10.1.0.0/24",
+                "serviceEndpoints": [],
+                "delegations": [],
+                "privateEndpointNetworkPolicies": "Enabled",
+                "privateLinkServiceNetworkPolicies": "Enabled"
+            }
+        },
+       
+        {
+            "type": "Microsoft.Sql/servers/databases",
+            "apiVersion": "2019-06-01-preview",
+            "name": "[concat(variables('servers_dbserver98_name'), '/', parameters('DataBaseName'))]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('servers_dbserver98_name'))]"
+            ],
+            "sku": {
+                "name": "GP_Gen4",
+                "tier": "GeneralPurpose",
+                "family": "Gen4",
+                "capacity": 1
+            },
+            "kind": "v12.0,user,vcore",
+            "properties": {
+                "collation": "SQL_Latin1_General_CP1_CI_AS",
+                "maxSizeBytes": 34359738368,
+                "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
+                "zoneRedundant": false,
+                "licenseType": "LicenseIncluded",
+                "readScale": "Disabled",
+                "readReplicaCount": 0,
+                "storageAccountType": "GRS"
+            }
+        },
+        
+        
+        {
+            "type": "Microsoft.Sql/servers/encryptionProtector",
+            "apiVersion": "2015-05-01-preview",
+            "name": "[concat(variables('servers_dbserver98_name'), '/current')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('servers_dbserver98_name'))]"
+            ],
+            "kind": "servicemanaged",
+            "properties": {
+                "serverKeyName": "ServiceManaged",
+                "serverKeyType": "ServiceManaged"
+            }
+        },
+     
+        {
+            "type": "Microsoft.Sql/servers/securityAlertPolicies",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(variables('servers_dbserver98_name'), '/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers', variables('servers_dbserver98_name'))]"
+            ],
+            "properties": {
+                "state": "Enabled",
+                "disabledAlerts": [
+                    ""
+                ],
+                "emailAddresses": [
+                    ""
+                ],
+                "emailAccountAdmins": true,
+                "retentionDays": 0
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccounts_sqlauditeaszhlbarjllpzlq_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts_sqlauditeaszhlbarjllpzlq_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'))]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccounts_fileserver98_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts_fileserver98_name'))]"
+            ],
+            "sku": {
+                "name": "Premium_LRS",
+                "tier": "Premium"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'), '/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'))]" 
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines", 
+            "apiVersion": "2019-07-01",
+            "name": "[variables('virtualMachines_VM_APP_2_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_vm_app_2444_name'))]",
+                "[resourceId('Microsoft.Storage/StorageAccounts', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_F8s_v2"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "MicrosoftWindowsServer",
+                        "offer": "WindowsServer",
+                        "sku": "2019-Datacenter",
+                        "version": "latest"
+                    },
+					
+                    "osDisk": {
+                        "osType": "Windows",
+                        "name": "[concat(variables('virtualMachines_VM_APP_2_name'), '_OsDisk_1_57e4ea0890e948e9aefbadca4e41ccc2')]",
+                        "createOption": "FromImage",
+                        "caching": "ReadWrite"
+                       
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[variables('virtualMachines_VM_APP_2_name')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+					"adminPassword": "[parameters('adminPassword')]",
+                    "windowsConfiguration": {
+                        "provisionVMAgent": true,
+                        "enableAutomaticUpdates": true
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaces_vm_app_2444_name'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[concat('https://', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'), '.blob.core.windows.net/')]"
+                    }
+                }
+            },
+			"resources":[
+				{
+			  "type": "Microsoft.Compute/virtualMachines/extensions",
+			  "apiVersion": "2019-12-01",
+			  "name": "[concat(variables('virtualMachines_VM_APP_2_name'),'/', 'Mypowershell2')]",
+			  "location": "[parameters('location')]",
+			 "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', variables('virtualMachines_VM_APP_2_name'))]" 
+            ],
+			  "properties": {
+				  "publisher": "Microsoft.Compute",
+				  "type": "CustomScriptExtension",
+				  "typeHandlerVersion": "1.7",
+				  "autoUpgradeMinorVersion":true,
+				  "settings": {
+					"fileUris": [
+					  "https://raw.githubusercontent.com/manuelrb98/Powershell/master/PowershellScript.ps1" 
+					]
+					},
+					"protectedSettings": {
+					"commandToExecute": "[concat('powershell.exe -ExecutionPolicy Unrestricted -File PowershellScript.ps1', ' -database ', parameters('DataBaseName'), ' -uid ', parameters('adminUsername'), ' -pwd ', parameters('adminPassword'), ' -dbserver ', variables('servers_dbserver98_name'), ' -vmname ', variables('virtualMachines_VM_APP_2_name'))]"
+				  }
+			  }}
+			]
+			
+			
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworkGateways",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('virtualNetworkGateways_GATEWAYVNET2_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_IpBPDOCUMENT_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworks_RG2vnet657_name'), 'GatewaySubnet')]"
+            ],
+            "properties": {
+                "enablePrivateIpAddress": false,
+                "ipConfigurations": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_IpBPDOCUMENT_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworks_RG2vnet657_name'), 'GatewaySubnet')]"
+                            }
+                        }
+                    }
+                ],
+                "sku": {
+                    "name": "VpnGw1",
+                    "tier": "VpnGw1"
+                },
+                "gatewayType": "Vpn",
+                "vpnType": "RouteBased",
+                "enableBgp": false,
+                "activeActive": false,
+                "vpnClientConfiguration": {
+                    "vpnClientAddressPool": {
+                        "addressPrefixes": [
+                            "172.16.0.0/24"
+                        ]
+                    },
+                    "vpnClientProtocols": [
+                        "SSTP"
+                    ],
+                    "vpnClientRootCertificates": [
+                        {
+                            "name": "P2SRootCert",
+                            "properties": {
+                                "publicCertData": "MIIC5zCCAc+gAwIBAgIQZqpsh+u81ZpGt3RycAyP7TANBgkqhkiG9w0BAQsFADAWMRQwEgYDVQQDDAtQMlNSb290Q2VydDAeFw0yMDA0MDgxNTU2MzVaFw0yMTA0MDgxNjE2MzVaMBYxFDASBgNVBAMMC1AyU1Jvb3RDZXJ0MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsawHM9F3hzzyaKNMssNGqQITt9YANMpkMtiMrAGzbwmfyvrZiWGDlnOhh5gh+jBejGlAlOBj2k1+zFzG+qgiwGhwMTaIki9VKWb1TCnRO8SI3QCVrQY4694+4EytIYuUngoUE7Vo9gmFuGS1Nm1e/SnA13EawyH3ugcDMo9UqM+IDQ9UmAhvE3FlDGY8LjJA24sZY//wrFNL+OTND5OJjJ53LzX3ezvxcmtoqvzrTQ16UF4OvyZvpwLVUDwmV5JWBAEAqY0a/FKpq+DVn2jqDUn5WdgNmceOqQkV4GtLY0ICym64oofZpudKwnwgH2lYoPkzDyurXTpkUQV60uFHwQIDAQABozEwLzAOBgNVHQ8BAf8EBAMCAgQwHQYDVR0OBBYEFOCb8qfFAC+e3MTwF1d0ZMuiHKvMMA0GCSqGSIb3DQEBCwUAA4IBAQA0iecEDkmdxYge5HuXYSm7OF0dSswX3MJvLjjE3spwzCLHFl74SU7evNTHBIUKaZtXbkGQ1Ixyv86x4t3R++oeywHo0EN/N8ITSsCLUu10SRjIsttLNh3dTCowNyGr9AZFr4YPTn9BMGXcajwbW9c9bVVsS50AW1FZ7jr2VVx/XFCz+gbmzwD66RJE5T7cRiLdfSAM4e2nhIlm0r5efvRxiAWIBCQWNbda7IOi7anjQEzaqIZY276ZrE4N2fJEuQCib+Hl31A63UyfEVKQNVvywYmT2+Occ+79PoJbjhBH4f383HZEajLT2UQ4+Mm4XsGt0qO6GY+6r0OJxyNOfozT"
+                            }
+                        }
+                    ],
+                    "vpnClientRevokedCertificates": [],
+                    "radiusServers": [],
+                    "vpnClientIpsecPolicies": []
+                },
+                "bgpSettings": {
+                    "asn": 65515,
+                    "bgpPeeringAddress": "10.1.0.254",
+                    "peerWeight": 0,
+                    "bgpPeeringAddresses": [
+                        {
+                            "ipconfigurationId": "[concat(resourceId('Microsoft.Network/virtualNetworkGateways', variables('virtualNetworkGateways_GATEWAYVNET2_name')), '/ipConfigurations/default')]",
+                            "customBgpIpAddresses": []
+                        }
+                    ]
+                },
+                "vpnGatewayGeneration": "Generation1"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/advisors",
+            "apiVersion": "2014-04-01",
+            "name": "[concat(variables('servers_dbserver98_name'), '/',parameters('DataBaseName'),'/ForceLastGoodPlan')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', variables('servers_dbserver98_name'), parameters('DataBaseName'))]",
+                "[resourceId('Microsoft.Sql/servers', variables('servers_dbserver98_name'))]"
+            ],
+            "properties": {
+                "autoExecuteValue": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/backupShortTermRetentionPolicies",
+            "apiVersion": "2017-10-01-preview",
+            "name": "[concat(variables('servers_dbserver98_name'), '/',parameters('DataBaseName'),'/default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', variables('servers_dbserver98_name'), parameters('DataBaseName'))]",
+                "[resourceId('Microsoft.Sql/servers', variables('servers_dbserver98_name'))]"
+            ],
+            "properties": {
+                "retentionDays": 7
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/extendedAuditingSettings",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(variables('servers_dbserver98_name'),'/',parameters('DataBaseName'),'/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', variables('servers_dbserver98_name'), parameters('DataBaseName'))]",
+                "[resourceId('Microsoft.Sql/servers', variables('servers_dbserver98_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "retentionDays": 0,
+                "auditActionsAndGroups": [],
+                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000",
+                "isStorageSecondaryKeyInUse": false,
+                "isAzureMonitorTargetEnabled": false
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/securityAlertPolicies",
+            "apiVersion": "2018-06-01-preview",
+            "name": "[concat(variables('servers_dbserver98_name'), '/',parameters('DataBaseName'),'/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', variables('servers_dbserver98_name'), parameters('DataBaseName'))]",
+                "[resourceId('Microsoft.Sql/servers', variables('servers_dbserver98_name'))]"
+            ],
+            "properties": {
+                "state": "Disabled",
+                "disabledAlerts": [
+                    ""
+                ],
+                "emailAddresses": [
+                    ""
+                ],
+                "emailAccountAdmins": false,
+                "retentionDays": 0
+            }
+        },
+        {
+            "type": "Microsoft.Sql/servers/databases/vulnerabilityAssessments",
+            "apiVersion": "2017-03-01-preview",
+            "name": "[concat(variables('servers_dbserver98_name'), '/',parameters('DataBaseName'),'/Default')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Sql/servers/databases', variables('servers_dbserver98_name'), parameters('DataBaseName'))]",
+                "[resourceId('Microsoft.Sql/servers', variables('servers_dbserver98_name'))]"
+            ],
+            "properties": {
+                "recurringScans": {
+                    "isEnabled": false,
+                    "emailSubscriptionAdmins": true,
+                    "emails": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'), '/default/backupscontainer')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'), '/default/bootdiagnostics-vmapp2-3a17dc12-7351-436d-86b8-99800ed6e3c1')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccounts_sqlauditeaszhlbarjllpzlq_name'), '/default/sqldbauditlogs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccounts_sqlauditeaszhlbarjllpzlq_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts_sqlauditeaszhlbarjllpzlq_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'), '/default/sqldbauditlogs')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'), '/default/vulnerability-assessment')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts_sqlvaj4lmjvwtbf34s_name'))]"
+            ],
+            "properties": {
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(variables('storageAccounts_fileserver98_name'), '/default/datamaster')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccounts_fileserver98_name'), 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccounts_fileserver98_name'))]"
+            ],
+            "properties": {
+                "shareQuota": 100
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2020-03-01",
+            "name": "[variables('networkInterfaces_vm_app_2444_name')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_VM_APP_2_ip_name'))]",
+                "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworks_RG2vnet657_name'), 'default')]",
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_VM_APP_2_nsg_name'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "10.1.1.4",
+                            "privateIPAllocationMethod": "Static",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddresses_VM_APP_2_ip_name'))]"
+                            },
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworks_RG2vnet657_name'), 'default')]"
+                            },
+                            "primary": true,
+                            "privateIPAddressVersion": "IPv4"
+                        }
+                    }
+                ],
+                "dnsSettings": {
+                    "dnsServers": []
+                },
+                "enableAcceleratedNetworking": true,
+                "enableIPForwarding": false,
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroups_VM_APP_2_nsg_name'))]"
+                }
+            }
+        }
+    ],
+	 "outputs": {
+    "hostname": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddresses_VM_APP_2_ip_name'))).IpAddress]"
+    }
+  }
+}
